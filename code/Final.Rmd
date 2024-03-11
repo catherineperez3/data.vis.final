@@ -1,0 +1,68 @@
+---
+title: "Final Project"
+author: "Katie Perez"
+date: "2024-02-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(ggplot2)
+library(readxl)
+library(readr)
+library(here)
+
+```
+
+
+
+
+
+```{r input data}
+
+here::set_here()
+
+
+data_22 <- read.csv(here("data/2022.csv"))
+data_21 <- read.csv(here("data/2021.csv"))
+data_20 <- read.csv(here("data/2020.csv"))
+data_19 <- read.csv(here("data/2019.csv"))
+data_18 <- read.csv(here("data/2018.csv"))
+names(data_22)[c(4, 5, 6)] <- c("Total_enroll", "undergrad_enroll", "grad_enroll")
+names(data_21)[c(4, 5, 6)] <- c("Total_enroll", "undergrad_enroll", "grad_enroll")
+names(data_20)[c(4, 5, 6)] <- c("Total_enroll", "undergrad_enroll", "grad_enroll")
+names(data_19)[c(4, 5, 6)] <- c("Total_enroll", "undergrad_enroll", "grad_enroll")
+names(data_18)[c(4, 5, 6)] <- c("Total_enroll", "undergrad_enroll", "grad_enroll")
+
+combined_data <- rbind(data_22, data_21, data_20, data_19, data_18)
+
+
+my_color <- rep('gray',length(unique(combined_data$institution.name)))
+names(my_color) <- unique(combined_data$institution.name)
+my_color["Portland State University"] <- 'blue'
+my_color["Portland Community College"] <- 'orange'
+
+psu <- filter(combined_data, 'institution.name' == "Portland State University")
+pcc <- filter(combined_data, 'institution.name' == "Portland Community College")
+
+enrollment <- ggplot(combined_data,aes(x = year, y = Total_enroll, color = institution.name)) +
+geom_line(aes(group = institution.name))+
+#scale_color_manual(values=my_color)+
+guides(color=FALSE, size = FALSE)+ # Hide the legend for color
+#scale_x_discrete(breaks = c("2019", "2021"))+
+#scale_y_continuous(seq(min(pop_long$`Population`), max(pop_long$`Population`), by = 10000000))+
+#geom_line(data = psu, aes(group = `Country Name`), color = "blue") +
+#geom_line(data = pcc, aes(group = `Country Name`), color = "orange")+
+  labs(title = 'Total enrollment in Oregon Public Colleges (2018-2022)',
+       x     = '',
+       y     = '',
+       subtitle = '()',
+       caption = "Source: IPEDS\n https://nces.ed.gov/")+ 
+  theme_minimal()
+
+enrollment
+```
+
+
+

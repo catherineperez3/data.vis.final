@@ -1,0 +1,297 @@
+---
+title: 'DRAFT: Final Project'
+author: "Katie Perez"
+date: "2024-03-11"
+output:
+  html_document: 
+    code_folding: hide
+    suppress_warnings: true
+  word_document: default
+  pdf_document:
+     keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(here)
+library(ggplot2)
+library(readxl)
+library(readr)
+library(tidyr)
+library(dplyr)
+library(stringr) 
+```
+
+
+
+
+Line graph
+This data visualization illustrates the fluctuations in enrollment over time through this visualization. To elucidate the trends, I propose focusing on selected colleges and universities. From the plot, it's evident that both UO and OSU have experienced enrollment growth, whereas other institutions depict a marginal decline. I've assigned distinct colors to each line based on the official brand hex codes of the respective institutions. By analyzing this data visualization, policymakers and educators and gain valuable insights in to the factors influencing Oregonian students' decisions to pursue higher education, ultimaely guiding future strategies for improving access and fostering educational growth in the region. As far as designing this visualization adding annotations with school names could enhance clarity, I am concerned it might overly clutter the visualization.
+```{r, echo=FALSE, warning=FALSE}
+
+here::set_here()
+
+
+data_22 <- read.csv(here("data/2022.csv"))
+data_21 <- read.csv(here("data/2021.csv"))
+data_20 <- read.csv(here("data/2020.csv"))
+data_19 <- read.csv(here("data/2019.csv"))
+data_18 <- read.csv(here("data/2018.csv"))
+names(data_22)[c(4, 5, 6)] <- c("Total_enroll", "undergrad_enroll", "grad_enroll")
+names(data_21)[c(4, 5, 6)] <- c("Total_enroll", "undergrad_enroll", "grad_enroll")
+names(data_20)[c(4, 5, 6)] <- c("Total_enroll", "undergrad_enroll", "grad_enroll")
+names(data_19)[c(4, 5, 6)] <- c("Total_enroll", "undergrad_enroll", "grad_enroll")
+names(data_18)[c(4, 5, 6)] <- c("Total_enroll", "undergrad_enroll", "grad_enroll")
+
+combined_data <- rbind(data_22, data_21, data_20, data_19, data_18)
+```
+
+```{r, echo=FALSE, warning=FALSE}
+my_color <- rep('gray',length(unique(combined_data$institution.name)))
+names(my_color) <- unique(combined_data$institution.name)
+my_color["Portland State University"] <- '#213921'
+my_color["Oregon State University"] <- 'orange'
+my_color["University of Oregon"] <- '#FEE123'
+my_color["Eastern Oregon University"] <- '#002855'
+my_color["Western Oregon University"] <- '#db0a29'
+my_color["Southern Oregon University"] <- '#000000'
+my_color["Oregon Institute of Technology"] <- '#00677f'
+
+#psu <- filter(combined_data, 'institution.name' == "Portland State University")
+#pcc <- filter(combined_data, 'institution.name' == "Portland Community College")
+
+enrollment <- ggplot(combined_data,aes(x = year, y = Total_enroll, color = institution.name)) +
+geom_line(aes(group = institution.name))+
+scale_color_manual(values=my_color)+
+guides(color=FALSE, size = FALSE)+ # Hide the legend for color
+#scale_x_discrete(breaks = c("2019", "2021"))+
+#scale_y_continuous(seq(min(pop_long$`Population`), max(pop_long$`Population`), by = 10000000))+
+#geom_line(data = psu, aes(group = `Country Name`), color = "blue") +
+#geom_line(data = pcc, aes(group = `Country Name`), color = "orange")+
+  labs(title = 'Total enrollment in Oregon Public Colleges (2018-2022)',
+       x     = '',
+       y     = '',
+       subtitle = '()',
+       caption = "Source: IPEDS\n https://nces.ed.gov/")+ 
+  theme_minimal()
+#enrollment + annotate("text", x = 2020, y = 20000, label = "An annotation")
+enrollment    
+```
+
+```{r, echo=FALSE, warning=FALSE}
+my_color <- rep('#545252',length(unique(combined_data$institution.name)))
+names(my_color) <- unique(combined_data$institution.name)
+my_color["Portland State University"] <- '#213921'
+my_color["Oregon State University"] <- 'orange'
+my_color["University of Oregon"] <- '#FEE123'
+my_color["Eastern Oregon University"] <- '#002855'
+my_color["Western Oregon University"] <- '#db0a29'
+my_color["Southern Oregon University"] <- '#000000'
+my_color["Oregon Institute of Technology"] <- '#00677f'
+
+
+enrollment2 <- ggplot(combined_data,aes(x = year, y = Total_enroll, color = institution.name)) +
+geom_line(aes(group = institution.name), size = 0.5)+
+scale_color_manual(values=my_color)+
+guides(color=FALSE, size = FALSE)+ 
+  labs(title = 'Among Oregon Public Colleges, Oregon State University\nsteadily increases enrollment over 4 years, (2018-2022)',
+       x     = '',
+       y     = 'Number of\n students',
+       subtitle = '()',
+       caption = "Source: IPEDS\n https://nces.ed.gov/")+ 
+  theme_minimal()+
+   annotate('text',x=2022,y=35000,label='OSU')+
+  annotate('text',x=2022,y=25000,label='UO')+
+  annotate('text',x=2022,y=20500,label='PSU')+
+  annotate('text',x=2022,y=4000,label='WOU')+
+  annotate('text',x=2022,y=6000,label='OIT')+
+  theme(panel.grid.major.x = element_blank(),  
+        panel.grid.minor.x = element_blank())+
+  theme(axis.title.y = element_text(angle = 0, vjust = 1, hjust = 1, size = 7))+
+  scale_x_continuous(expand = c(0, 0.1)) 
+
+enrollment2 <- enrollment2 +
+  geom_line(
+    data = subset(combined_data, institution.name %in% c("Oregon State University", "University of Oregon", "Portland State University")),
+    aes(group = institution.name),
+    size = 2)
+
+enrollment2    
+```
+
+
+
+Paired bar chart applicants and enrolled
+
+This paired bar graph illustrates both applicants and enrollees, highlighting the shift in numbers between the two categories. The transition from applicants to enrollees presents an intriguing insight. Furthermore, the total number of applicants each institution receives holds its own significance. Discrepancies between the two bars may indicate factors such as selectivity of universities, changes in application preferences, or shifts in demographics. This visualization could serve as a valuable tool for university administrators and policymakers to assess the effectiveness of recruitment strategies, understand the dynamics between application numbers and actual enrollments, and making informed decisions to enhance student recruitement and retention efforts for the future. To further enrich the analysis, it would be beneficial to incorporate the number of acceptances into the visualization. Applicant and enrollment data was not available for the 2-year institutions, so I omitted them from this visualization.
+
+```{r, echo=FALSE, warning=FALSE}
+full_data_22 <- read.csv(here("data/full2022.csv"))
+
+
+pair_full_data_22 <- full_data_22[c(6, 26, 17, 21, 11, 15, 12, 13), ]
+pair_full_data_22  <- subset(pair_full_data_22, select = c(institution.name, year, ADM2022.Applicants.total, ADM2022.Enrolled.total))
+
+
+df_long <- full_data_22 %>% 
+  select(institution.name, ADM2022.Applicants.total, ADM2022.Enrolled.total) %>% 
+  pivot_longer(cols = -c(institution.name),
+               names_to = "ADM2022stuff",
+               values_to = "values") %>% 
+  na.omit()
+
+df_long <- rename(df_long,Status = ADM2022stuff)
+
+df_long$Status[df_long$Status == "ADM2022.Applicants.total"] <- "Applicants"
+df_long$Status[df_long$Status == "ADM2022.Enrolled.total"] <- "Enrolled"
+
+ggplot(df_long, aes(x = reorder(institution.name,Status, decreasing=FALSE), y = values, fill = Status))+ 
+  geom_bar(stat = "identity", position = "dodge")+
+  coord_flip()+
+    labs(title = 'Number of applicants to 4-year public institutions in Oregon',
+         x     = '',
+         y     = '',
+         subtitle = '',
+         caption = '')
+
+```
+
+
+```{r, echo=FALSE, warning=FALSE}
+full_data_22 <- read.csv(here("data/full2022.csv"))
+
+
+pair_full_data_22 <- full_data_22[c(6, 26, 17, 21, 11, 15, 12, 13), ]
+pair_full_data_22  <- subset(pair_full_data_22, select = c(institution.name, year, ADM2022.Applicants.total, ADM2022.Enrolled.total))
+
+
+df_long <- full_data_22 %>% 
+  select(institution.name, ADM2022.Applicants.total, ADM2022.Enrolled.total) %>% 
+  pivot_longer(cols = -c(institution.name),
+               names_to = "ADM2022stuff",
+               values_to = "values") %>% 
+  na.omit()
+
+df_long <- rename(df_long,Status = ADM2022stuff)
+
+df_long$Status[df_long$Status == "ADM2022.Applicants.total"] <- "Applicants"
+df_long$Status[df_long$Status == "ADM2022.Enrolled.total"] <- "Enrolled"
+
+df_long$institution.name <- gsub("Oregon State University-Cascades Campus", "OSU-Cascades Campus", df_long$institution.name)
+
+custom_order <- c("University of Oregon", "Oregon State University", "Portland State University", "Oregon Institute of Technology", "Western Oregon University", "Southern Oregon University", "OSU-Cascades Campus", "Eastern Oregon University")
+
+
+df_long$institution.name <- factor(df_long$institution.name, levels = custom_order)
+
+
+ggplot(df_long, aes(x = institution.name, y = values, fill = Status))+ 
+  geom_bar(stat = "identity", position = "dodge")+
+    labs(title = 'Number of applicants to 4-year public institutions in Oregon in 2022',
+         x     = '',
+         y     = 'number of\n applicants',
+         subtitle = '',
+         caption = '')+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(panel.grid.major.x = element_blank(),  
+        panel.grid.minor.x = element_blank())+
+  theme(axis.title.y = element_text(angle = 0, vjust = 1, hjust = 10, size = 7))
+  
+
+```
+
+```{r, echo=FALSE, warning=FALSE}
+
+
+college_summary <- pivot_wider(df_long, names_from = Status, values_from = values)
+
+college_summary <- college_summary %>%
+  mutate(ratio = Enrolled / Applicants * 100) %>%  
+  mutate(ratio = round(ratio))        
+
+p<-ggplot(df_long, aes(x = institution.name, y = values, fill = Status))+ 
+  geom_bar(stat = "identity", position = "dodge")+
+    labs(title = 'Number of applicants to 4-year public institutions in Oregon in 2022',
+         x     = '',
+         y     = 'number of\n applicants',
+         subtitle = '(% enrolled)',
+         caption = '')+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(panel.grid.major.x = element_blank(),  
+        panel.grid.minor.x = element_blank())+
+  theme(axis.title.y = element_text(angle = 0, vjust = 1, hjust = 10, size = 7))
+
+p <- p + annotate("text", x = "University of Oregon", y = 30000, 
+                  label = "14%", size = 4)+ 
+  annotate("text", x = "Oregon State University", y = 20000, 
+                  label = "18%", size = 4)+ 
+  annotate("text", x = "Portland State University", y = 10000, 
+                  label = "21%", size = 4)+ 
+  annotate("text", x = "Oregon Institute of Technology", y = 5000, 
+                  label = "10%", size = 4)+ 
+  annotate("text", x = "Western Oregon University", y = 5000, 
+                  label = "17%", size = 4)+ 
+  annotate("text", x = "OSU-Cascades Campus", y = 5000, 
+                  label = "9%", size = 4)+ 
+  annotate("text", x = "Southern Oregon University", y = 5000, 
+                  label = "27%", size = 4)+
+  annotate("text", x = "Eastern Oregon University", y = 5000, 
+                  label = "25%", size = 4)
+p
+```
+
+
+Bar Plot 
+
+In this plot, I analyze the retention rates of Oregon's public universities. Although I categorized the institutions into 2-year and 4-year groups in the dataset, this grouping did not translate into the plot. It reveals the differences is retention precentages between the two types of institutions, showcasing varying levels of student success and cimmitment to completing their programs. Higher retentionrats in 4-year colleges suggest stronger institutionsl support, academic resources and a more structured academic environment conducive to student success. Conversely, lower retetion rates in 2-year colleges could indicate challenges such as financial constraints, lack of support services or a higher rate of student transferring to other institutions. Analyzing this bar plot could provide valuable insghts for policymakers and educators to identify areas for imporvement in student retention strategies, ultimately enhancing the educational experience and success rates in both 2-year and 4-year colleges across Oregon. I will continue refining my code to accurately represent these distinctions. To enhance the informative value of this visualization, I propose expanding the timeframe to encompass multiple years. Facet wrapping across several years could offer a comprehensive view. Additionally, it's crucial to note that the retention rates presented are proportions. I anticipate that examining retention rates alongside data on applicants and enrollees will provide valuable insights into enrollment dynamics.
+
+
+```{r, echo=FALSE, warning=FALSE}
+full_data_22 <- read.csv(here("data/full2022.csv"))
+
+
+full_data_22 <- full_data_22[-c(10), ]
+full_data_22 <- full_data_22 %>% arrange(HD2022.Sector.of.institution)
+o<- ggplot(full_data_22, aes(x =  institution.name, #reorder(Country.Name,X2022,decreasing=TRUE), 
+                      y = EF2022D.Full.time.retention.rate..2022)) +
+    geom_bar(stat = "identity",fill='orange',alpha=0.5) +
+    labs(title = 'The retention rates at Oregon public higher education institutions in 2022',
+         x     = '',
+         y     = '',
+         caption = "Source: IPEDS\n https://nces.ed.gov/")+
+    theme_minimal()
+
+o+ theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r, echo=FALSE, warning=FALSE}
+sec_full_data_22 <- read.csv(here("data/full2022.csv"))
+
+sec_full_data_22 <- sec_full_data_22[-c(10), ]
+sec_full_data_22 <- sec_full_data_22 %>% arrange(HD2022.Sector.of.institution, -EF2022D.Full.time.retention.rate..2022)
+
+sec_full_data_22 <- sec_full_data_22 %>%
+  mutate(new_institution.name = str_replace(institution.name, "Community College", "CC"))
+
+sec_full_data_22$new_institution.name <- factor(sec_full_data_22$new_institution.name, levels = sec_full_data_22$new_institution.name)
+
+
+o2<- ggplot(sec_full_data_22, aes(x =  new_institution.name,  
+                      y = EF2022D.Full.time.retention.rate..2022, fill = HD2022.Sector.of.institution)) +
+    geom_bar(stat = "identity", alpha=0.5) +
+  scale_fill_manual(values = c("#F39C12", "#8E44AD")) + 
+  theme(panel.grid.major.x = element_blank(),  
+        panel.grid.minor.x = element_blank())+
+    labs(title = 'The retention rates at Oregon public higher education institutions in 2022',
+         x     = '',
+         y     = '',
+         fill = 'Institution sector',
+         caption = "Source: IPEDS\n https://nces.ed.gov/")+
+    theme_minimal()+
+  scale_y_continuous(labels = function(x) paste0(format(x, digits = 2), "%"))
+
+o2+ theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
